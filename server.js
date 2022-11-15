@@ -1,9 +1,8 @@
 const express = require('express')
-const dotenv = require('dotenv'.config())
+const dotenv = require('dotenv').config()
 const PORT = process.env.PORT || 5000
 
 // Route imports
-const applicationRoutes = require('./routes/applicationRoutes')
 const taskRoutes = require('./routes/taskRoutes')
 
 const app = express()
