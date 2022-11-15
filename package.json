@@ -1,0 +1,11 @@
+{
+  "name": "task-management-api",
+  "version": "1.0.0",
+  "description": "This api is for a task management app",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "author": "Helen Tan",
+  "license": "ISC"
+}
