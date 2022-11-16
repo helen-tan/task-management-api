@@ -5,6 +5,8 @@ const catchAsyncErrors = require('../middleware/catchAsyncErrors')
 // utils (Helper methods)
 const { getRnumber } = require('../utils/getRnumber')
 const { getAppTaskIds } = require('../utils/getAppTaskIds')
+const { getAppTaskNotes } = require('../utils/getAppTaskNotes')
+const { getAppTaskState } = require('../utils/getAppTaskState')
 
 // @desc    Create a task (Note: An app must already exist in the DB. Please check in DB)
 // @route   /api//tasks/createTask
@@ -273,7 +275,133 @@ const getTasksByState = catchAsyncErrors(async (req, res) => {
 // @route   /api//tasks/promoteTask2Done
 // @access  Private
 const promoteTask2Done = catchAsyncErrors(async (req, res) => {
-    res.send("Hello")
+    const {
+        username,
+        password,
+        taskID,
+        taskNotes
+    } = req.body
+
+    // query database for the user with these login credentials
+    db.query('select * from users where username = ? ', [username], async (err, results) => {
+        //console.log(results)
+        if (err) {
+            return res.send({
+                code: "PT01"
+            })
+        } else {
+            if (results.length > 0) {
+                // Validation - Check that the is_active property is true first, otherwise prevent login
+                if (!results[0].is_active) {
+                    console.log("1")
+                    return res.send({
+                        code: "PT01"
+                    })
+                }
+                // If user is active, begin authenticating
+                const comparison = await bcrypt.compare(password, results[0].password)
+
+                if (comparison) {
+                    console.log("2")
+                    console.log({
+                        message: 'Login successful',
+                        data: results,
+                    });
+
+                    promoteTask2DoneAuthenticated()
+                } else {
+                    // username & password do not match
+                    console.log("3")
+                    return res.send({
+                        code: "PT01"
+                    })
+                }
+            } else {
+                // username does not exist
+                console.log("4")
+                res.send({
+                    code: "PT01"
+                })
+            }
+        }
+    })
+
+    const promoteTask2DoneAuthenticated = async () => {
+        // Get existing task_notes of the task to append the new_note to the string of task_notes
+        const response1 = await getAppTaskNotes(taskID)
+        const existing_notes = response1[0].task_notes
+
+        // Get current state of task
+        const response2 = await getAppTaskState(taskID)
+        const current_state = response2[0].task_state
+
+        let today = new Date();
+        let dd = String(today.getDate()).padStart(2, '0');
+        let mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
+        let yyyy = today.getFullYear();
+
+        let hours = today.getHours()
+        let mins = today.getMinutes()
+        let seconds = today.getSeconds()
+
+        today = yyyy + '-' + mm + '-' + dd;
+
+        // Check the current task_state
+        // Determine updated state + Construct string for new note
+        let new_state = ""
+        let new_note = ""
+        // Task not in doing state (in open state)
+        if (current_state === "open") {
+            console.log(`The task ${taskID} is in the ${current_state} state and cannot be promoted to Done`)
+            res.send({
+                code: "PT02"
+            })
+            // Task not in doing state (in todo state)
+        } else if (current_state === "todo") {
+            console.log(`The task ${taskID} is in the ${current_state} state and cannot be promoted to Done`)
+            res.send({
+                code: "PT02"
+            })
+            // Task not in doing state (in close state) TODO: Change 'closed' to 'close' in Db!!!!!!
+        } else if (current_state === "closed") {
+            console.log(`The task ${taskID} is in the ${current_state} state and cannot be promoted to Done`)
+            res.send({
+                code: "PT02"
+            })
+            // Task not in doing state (in done state)
+        } else if (current_state === "done") {
+            console.log(`The task ${taskID} is already in the Done state`)
+            res.send({
+                code: "PT02"
+            })
+        } if (current_state === "doing") {
+            new_state = "done"
+            new_note = `\n\n--------\n\n ${username} has promoted the task from "Doing" to "Done" [${today} ${hours}:${mins}:${seconds}]\n\n--------\n\n ${username} [${today} ${hours}:${mins}:${seconds}]: \n${taskNotes}`
+
+            // Append new string to current notes
+            const updated_task_notes = existing_notes + new_note
+
+            db.query(`UPDATE tasks 
+                SET task_state = ?, task_owner = ?, task_notes = ?
+                WHERE task_id = ?`, [new_state, username, updated_task_notes, taskID], (err, results) => {
+                if (err) {
+                    res.send({
+                        code: "PT02"
+                    })
+                } else {
+                    res.send({
+                        code: "PT00",
+                        data: {
+                            task_id: taskID,
+                            task_state: new_state,
+                            task_owner: username,
+                            task_notes: updated_task_notes
+                        },
+                    })
+                }
+            })
+        }
+    }
 })
 
 module.exports = {
