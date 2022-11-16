@@ -7,13 +7,12 @@ const { getRnumber } = require('../utils/getRnumber')
 const { getAppTaskIds } = require('../utils/getAppTaskIds')
 const { getAppTaskNotes } = require('../utils/getAppTaskNotes')
 const { getAppTaskState } = require('../utils/getAppTaskState')
+const { checkGroup } = require('../utils/checkGroup')
 
 // @desc    Create a task (Note: An app must already exist in the DB. Please check in DB)
 // @route   /api//tasks/createTask
 // @access  Private
 const createTask = catchAsyncErrors(async (req, res) => {
-    // Upon creation, user (project lead) cannot/don't need to provide: 
-    // task_id, task_app_acronym
     // task_plan Can't be assigned yet. Only user of group in app_permit_create can. Default to be ""
     // task_notes - to be seen in view, and added to when task is first created
     // task_state - open by default
@@ -71,6 +70,9 @@ const createTask = catchAsyncErrors(async (req, res) => {
     })
 
     const createTaskAuthenticated = async () => {
+        // Check to see if user is in the 'projectlead' group. Only project leads can create a task
+
+
         // Get existing task_ids of tasks in the app
         let tasksArr = await getAppTaskIds(applicationName) //  [ { task_id: 'NewTestApp_57' }, { task_id: 'NewTestApp_58' } ]
         //let tasksArr = [ { task_id: 'KlookMVP_1' }, { task_id: 'KlookMVP_2' } ]
