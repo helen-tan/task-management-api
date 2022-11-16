@@ -269,7 +269,15 @@ const getTasksByState = catchAsyncErrors(async (req, res) => {
     }
 })
 
+// @desc    Promote Task to Done State
+// @route   /api//tasks/promoteTask2Done
+// @access  Private
+const promoteTask2Done = catchAsyncErrors(async (req, res) => {
+    res.send("Hello")
+})
+
 module.exports = {
     createTask,
-    getTasksByState
+    getTasksByState,
+    promoteTask2Done
 }
