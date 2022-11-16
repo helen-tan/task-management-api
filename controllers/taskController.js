@@ -146,7 +146,7 @@ const createTask = async (req, res) => {
             today = yyyy + '-' + mm + '-' + dd;
 
             // Validation: Regex to validate user input
-            const task_nameRegexp = /^(?! )[A-Za-z0-9._\s]{2,20}(?<! )$/          // only alphanumeric, dots, underscores, spaces in between, no leading & trailing spaces, min 2 mx 20 chars
+            const task_nameRegexp = /^(?! )[A-Za-z0-9._\s]{0,45}(?<! )$/          // only alphanumeric, dots, underscores, spaces in between, no leading & trailing spaces, max 20 chars
 
             if (!taskName.match(task_nameRegexp)) {
                 console.log("Please provide a valid task name")
