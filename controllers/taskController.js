@@ -72,9 +72,10 @@ const createTask = catchAsyncErrors(async (req, res) => {
     const createTaskAuthenticated = async () => {
         // Check to see if user is in the 'projectlead' group. Only project leads can create a task
         const isProjectLead = await checkGroup(username, 'projectlead')
-        console.log(isProjectLead)
+        // console.log(isProjectLead)
         // If not user not in the group 'projectlead'
         if (!isProjectLead) {
+            console.log(`The user ${username} is not in the group 'projectlead' and hence cannot create any tasks'`)
             return res.send({
                 code: "CT01"
             })
@@ -336,6 +337,17 @@ const promoteTask2Done = catchAsyncErrors(async (req, res) => {
     })
 
     const promoteTask2DoneAuthenticated = async () => {
+        // Check to see if user is in the 'teammember' group. Only team members can promote a task to 'Done'
+        const isTeamMember = await checkGroup(username, 'teammember')
+        // console.log(isProjectLead)
+        // If not user not in the group 'projectlead'
+        if (!isTeamMember) {
+            console.log(`The user ${username} is not in the group 'teammember' and hence cannot promote tasks to Done'`)
+            return res.send({
+                code: "PT01"
+            })
+        }
+
         // Get existing task_notes of the task to append the new_note to the string of task_notes
         const response1 = await getAppTaskNotes(taskID)
         const existing_notes = response1[0].task_notes
