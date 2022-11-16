@@ -7,6 +7,8 @@ const { getRnumber } = require('../utils/getRnumber')
 const { getAppTaskIds } = require('../utils/getAppTaskIds')
 const { getAppTaskNotes } = require('../utils/getAppTaskNotes')
 const { getAppTaskState } = require('../utils/getAppTaskState')
+const { getAppPermitCreate } = require('../utils/getAppPermitCreate')
+const { getUserGroups } = require('../utils/getUserGroups')
 const { checkGroup } = require('../utils/checkGroup')
 
 // @desc    Create a task (Note: An app must already exist in the DB. Please check in DB)
@@ -70,16 +72,39 @@ const createTask = catchAsyncErrors(async (req, res) => {
     })
 
     const createTaskAuthenticated = async () => {
-        // Check to see if user is in the 'projectlead' group. Only project leads can create a task
-        const isProjectLead = await checkGroup(username, 'projectlead')
-        // console.log(isProjectLead)
-        // If not user not in the group 'projectlead'
-        if (!isProjectLead) {
-            console.log(`The user ${username} is not in the group 'projectlead' and hence cannot create any tasks'`)
+        // Check and see if user's groups is in the app's app_permit_create. Only users in the group specified by app_permit_create can create tasks
+        // Get the app's app_permit_create
+        const app_permit_create = await getAppPermitCreate(applicationName)
+        console.log(app_permit_create)
+
+        // Check the user's groups (an array)
+        const user_groups = await getUserGroups(username)
+        console.log(user_groups)
+
+        // Check if the group in app_permit_create is in the user's groups
+        let permitted = false
+        if (user_groups.includes(app_permit_create)) {
+            permitted = true
+            console.log(`The user ${username} is in the app_permit_create of the app ${applicationName} and hence is allowed to create tasks`)
+            } else {
+            console.log(`The user ${username} is not in the app_permit_create of the app ${applicationName} and hence cannot create tasks`)  
             return res.send({
                 code: "CT01"
-            })
+            }) 
         }
+        console.log(permitted)
+        
+
+        // Check to see if user is in the 'projectlead' group. Only project leads can create a task
+        // const isProjectLead = await checkGroup(username, 'projectlead')
+        // // console.log(isProjectLead)
+        // // If not user not in the group 'projectlead'
+        // if (!isProjectLead) {
+        //     console.log(`The user ${username} is not in the group 'projectlead' and hence cannot create any tasks'`)
+        //     return res.send({
+        //         code: "CT01"
+        //     })
+        // }
 
         // Get existing task_ids of tasks in the app
         let tasksArr = await getAppTaskIds(applicationName) //  [ { task_id: 'NewTestApp_57' }, { task_id: 'NewTestApp_58' } ]
