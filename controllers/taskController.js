@@ -2,6 +2,10 @@ const db = require('../config/database')
 const bcrypt = require('bcryptjs') // for hashing passswords
 const catchAsyncErrors = require('../middleware/catchAsyncErrors')
 
+// utils (Helper methods)
+const { getRnumber } = require('../utils/getRnumber')
+const { getAppTaskIds } = require('../utils/getAppTaskIds')
+
 // @desc    Create a task (Note: An app must already exist in the DB. Please check in DB)
 // @route   /api//tasks/createTask
 // @access  Private
@@ -195,40 +199,6 @@ const createTask = catchAsyncErrors(async (req, res) => {
 
 
 })
-
-// Helper method to return R_number of application
-const getRnumber = (app_acronym) => {
-    return new Promise((resolve, reject) => {
-        db.query('select app_rnumber from applications where app_acronym = ?', [app_acronym], (err, results) => {
-            if (err) {
-                reject(false)
-            } else {
-                try {
-                    resolve(results[0].app_rnumber)
-                } catch (err) {
-                    reject(false)
-                }
-            }
-        })
-    })
-}
-
-// Helper method to return the task_ids of an application
-const getAppTaskIds = (app_acronym) => {
-    return new Promise((resolve, reject) => {
-        db.query('select task_id from tasks where task_app_acronym = ?', [app_acronym], (err, results) => {
-            if (err) {
-                reject(false)
-            } else {
-                try {
-                    resolve(results)
-                } catch (err) {
-                    reject(false)
-                }
-            }
-        })
-    })
-}
 
 module.exports = {
     createTask
