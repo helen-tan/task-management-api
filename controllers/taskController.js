@@ -11,6 +11,7 @@ const { getAppPermitCreate } = require('../utils/getAppPermitCreate')
 const { getAppPermitDoing } = require('../utils/getAppPermitDoing')
 const { getUserGroups } = require('../utils/getUserGroups')
 const { getAppAcronym } = require('../utils/getAppAcronym')
+const { appExist } = require('../utils/appExist')
 // const { checkGroup } = require('../utils/checkGroup')
 
 // @desc    Create a task (Note: An app must already exist in the DB. Please check in DB)
@@ -88,6 +89,16 @@ const createTask = async (req, res) => {
 
     const createTaskAuthenticated = async () => {
         try {
+            // Validation: Check if the user input applicationName is an app_acronym that exist or not
+            const app_obj = await appExist(applicationName)
+            // console.log(app_obj)
+            if (app_obj.length < 1) {
+                console.log(`The application name ${applicationName} does not exist`)
+                return res.send({
+                    code: "CT02"
+                })
+            }
+
             // Check and see if user's groups is in the app's app_permit_create. Only users in the group specified by app_permit_create can create tasks
             // Get the app's app_permit_create
             const app_permit_create = await getAppPermitCreate(applicationName)
@@ -109,6 +120,17 @@ const createTask = async (req, res) => {
                 })
             }
             // console.log(permitted)
+
+            // Validation: Regex to validate user input
+            const task_nameRegexp = /^(?! )[A-Za-z0-9._\s]{0,45}(?<! )$/          // only alphanumeric, dots, underscores, spaces in between, no leading & trailing spaces, max 20 chars
+
+            if (!taskName.match(task_nameRegexp)) {
+                console.log("Please provide a valid task name")
+                return res.send({
+                    code: "CT03"
+                })
+            }
+            
 
             // Get existing task_ids of tasks in the app
             let tasksArr = await getAppTaskIds(applicationName) //  [ { task_id: 'NewTestApp_57' }, { task_id: 'NewTestApp_58' } ]
@@ -145,15 +167,6 @@ const createTask = async (req, res) => {
 
             today = yyyy + '-' + mm + '-' + dd;
 
-            // Validation: Regex to validate user input
-            const task_nameRegexp = /^(?! )[A-Za-z0-9._\s]{0,45}(?<! )$/          // only alphanumeric, dots, underscores, spaces in between, no leading & trailing spaces, max 20 chars
-
-            if (!taskName.match(task_nameRegexp)) {
-                console.log("Please provide a valid task name")
-                return res.send({
-                    code: "CT03"
-                })
-            }
 
             // Construct task notes string
             let task_notes = `${username} has created the task: ${taskName} [${today} ${hours}:${mins}:${seconds}]`
