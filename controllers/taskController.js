@@ -92,19 +92,7 @@ const createTask = catchAsyncErrors(async (req, res) => {
                 code: "CT01"
             }) 
         }
-        console.log(permitted)
-        
-
-        // Check to see if user is in the 'projectlead' group. Only project leads can create a task
-        // const isProjectLead = await checkGroup(username, 'projectlead')
-        // // console.log(isProjectLead)
-        // // If not user not in the group 'projectlead'
-        // if (!isProjectLead) {
-        //     console.log(`The user ${username} is not in the group 'projectlead' and hence cannot create any tasks'`)
-        //     return res.send({
-        //         code: "CT01"
-        //     })
-        // }
+        // console.log(permitted)
 
         // Get existing task_ids of tasks in the app
         let tasksArr = await getAppTaskIds(applicationName) //  [ { task_id: 'NewTestApp_57' }, { task_id: 'NewTestApp_58' } ]
