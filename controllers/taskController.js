@@ -8,8 +8,10 @@ const { getAppTaskIds } = require('../utils/getAppTaskIds')
 const { getAppTaskNotes } = require('../utils/getAppTaskNotes')
 const { getAppTaskState } = require('../utils/getAppTaskState')
 const { getAppPermitCreate } = require('../utils/getAppPermitCreate')
+const { getAppPermitDoing } = require('../utils/getAppPermitDoing')
 const { getUserGroups } = require('../utils/getUserGroups')
 const { checkGroup } = require('../utils/checkGroup')
+const { getAppAcronym } = require('../utils/getAppAcronym')
 
 // @desc    Create a task (Note: An app must already exist in the DB. Please check in DB)
 // @route   /api//tasks/createTask
@@ -75,11 +77,11 @@ const createTask = catchAsyncErrors(async (req, res) => {
         // Check and see if user's groups is in the app's app_permit_create. Only users in the group specified by app_permit_create can create tasks
         // Get the app's app_permit_create
         const app_permit_create = await getAppPermitCreate(applicationName)
-        console.log(app_permit_create)
+        // console.log(app_permit_create)
 
         // Check the user's groups (an array)
         const user_groups = await getUserGroups(username)
-        console.log(user_groups)
+        // console.log(user_groups)
 
         // Check if the group in app_permit_create is in the user's groups
         let permitted = false
@@ -350,15 +352,29 @@ const promoteTask2Done = catchAsyncErrors(async (req, res) => {
     })
 
     const promoteTask2DoneAuthenticated = async () => {
-        // Check to see if user is in the 'teammember' group. Only team members can promote a task to 'Done'
-        const isTeamMember = await checkGroup(username, 'teammember')
-        // console.log(isProjectLead)
-        // If not user not in the group 'projectlead'
-        if (!isTeamMember) {
-            console.log(`The user ${username} is not in the group 'teammember' and hence cannot promote tasks to Done'`)
+        // Check and see if user's groups is in the app's app_permit_doing. Only users in the group specified by app_permit_doing can promote tasks to Done
+        // Get app_acronym of the task
+        const app_acronym = await getAppAcronym(taskID)
+        // console.log(app_acronym)
+
+        // Get the app's app_permit_doing
+        const app_permit_doing = await getAppPermitDoing(app_acronym)
+        // console.log(app_permit_doing)
+
+        // Check the user's groups (an array)
+        const user_groups = await getUserGroups(username)
+        // console.log(user_groups)
+
+        // Check if the group in app_permit_doing is in the user's groups
+        let permitted = false
+        if (user_groups.includes(app_permit_doing)) {
+            permitted = true
+            console.log(`The user ${username} is in the app_permit_doing of the app ${app_acronym} and hence is able to promote tasks to Done`)
+            } else {
+            console.log(`The user ${username} is not in the app_permit_doing of the app ${app_acronym} and hence cannot promote tasks to Done`)  
             return res.send({
                 code: "PT01"
-            })
+            }) 
         }
 
         // Get existing task_notes of the task to append the new_note to the string of task_notes
