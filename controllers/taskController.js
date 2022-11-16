@@ -196,10 +196,16 @@ const createTask = catchAsyncErrors(async (req, res) => {
         })
 
     }
+})
 
-
+// @desc    Get tasks by state
+// @route   /api//tasks/getTasksByState
+// @access  Private
+const getTasksByState = catchAsyncErrors(async (req, res) => {
+    res.send("Hello")
 })
 
 module.exports = {
-    createTask
+    createTask,
+    getTasksByState
 }
