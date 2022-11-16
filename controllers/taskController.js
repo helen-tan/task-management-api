@@ -149,9 +149,9 @@ const createTask = async (req, res) => {
             const task_nameRegexp = /^(?! )[A-Za-z0-9._\s]{2,20}(?<! )$/          // only alphanumeric, dots, underscores, spaces in between, no leading & trailing spaces, min 2 mx 20 chars
 
             if (!taskName.match(task_nameRegexp)) {
-                return res.status(200).send({
-                    success: false,
-                    message: 'Please give a valid task name'
+                console.log("Please provide a valid task name")
+                return res.send({
+                    code: "CT03"
                 })
             }
 
