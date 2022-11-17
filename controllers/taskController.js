@@ -121,8 +121,16 @@ const createTask = async (req, res) => {
             }
             // console.log(permitted)
 
+            // Validation: Task name input cannot be empty
+            if (taskName.length < 1) {
+                console.log("taskName input cannot be empty")
+                return res.send({
+                    code: "CT03"
+                })
+            }
+
             // Validation: Regex to validate user input
-            const task_nameRegexp = /^(?! )[A-Za-z0-9._\s]{0,45}(?<! )$/          // only alphanumeric, dots, underscores, spaces in between, no leading & trailing spaces, max 20 chars
+            const task_nameRegexp = /^(?! )[A-Za-z0-9._\s]{0,45}(?<! )$/          // only alphanumeric, dots, underscores, spaces in between, no leading & trailing spaces, max 45 chars
 
             if (!taskName.match(task_nameRegexp)) {
                 console.log("Please provide a valid task name")
@@ -130,7 +138,7 @@ const createTask = async (req, res) => {
                     code: "CT03"
                 })
             }
-            
+
 
             // Get existing task_ids of tasks in the app
             let tasksArr = await getAppTaskIds(applicationName) //  [ { task_id: 'NewTestApp_57' }, { task_id: 'NewTestApp_58' } ]
@@ -224,7 +232,7 @@ const createTask = async (req, res) => {
             ], (err, results) => {
                 if (err) {
                     res.send({
-                        code: "CT01"
+                        code: "CT03"
                     })
                 } else {
                     res.send({
@@ -261,7 +269,7 @@ const createTask = async (req, res) => {
 // @desc    Get tasks by state
 // @route   /api//tasks/getTasksByState
 // @access  Private
-const getTasksByState = catchAsyncErrors(async (req, res) => {
+const getTasksByState = async (req, res) => {
     const {
         username,
         password,
@@ -269,65 +277,85 @@ const getTasksByState = catchAsyncErrors(async (req, res) => {
         taskState
     } = req.body
 
-    // query database for the user with these login credentials
-    db.query('select * from users where username = ? ', [username], async (err, results) => {
-        //console.log(results)
-        if (err) {
-            return res.send({
-                code: "GT01"
-            })
-        } else {
-            if (results.length > 0) {
-                // Validation - Check that the is_active property is true first, otherwise prevent login
-                if (!results[0].is_active) {
-                    console.log("1")
-                    return res.send({
-                        code: "GT01"
-                    })
-                }
-                // If user is active, begin authenticating
-                const comparison = await bcrypt.compare(password, results[0].password)
-
-                if (comparison) {
-                    console.log("2")
-                    console.log({
-                        message: 'Login successful',
-                        data: results,
-                    });
-
-                    getTasksByStateAuthenticated()
-                } else {
-                    // username & password do not match
-                    console.log("3")
-                    return res.send({
-                        code: "GT01"
-                    })
-                }
-            } else {
-                // username does not exist
-                console.log("4")
-                res.send({
-                    code: "GT01"
-                })
-            }
-        }
-    })
-
-    const getTasksByStateAuthenticated = async () => {
-        db.query(`select * from tasks where task_app_acronym = ? and task_state = ?`, [applicationName, taskState], (err, results) => {
+    try {
+        //req = abc // Use this to induce the catch all error
+        // query database for the user with these login credentials
+        db.query('select * from users where username = ? ', [username], async (err, results) => {
+            //console.log(results)
             if (err) {
-                res.send({
+                return res.send({
                     code: "GT01"
                 })
             } else {
-                res.send({
-                    code: "GT00",
-                    tasks: results
-                })
+                if (results.length > 0) {
+                    // Validation - Check that the is_active property is true first, otherwise prevent login
+                    if (!results[0].is_active) {
+                        console.log("1")
+                        return res.send({
+                            code: "GT01"
+                        })
+                    }
+                    // If user is active, begin authenticating
+                    const comparison = await bcrypt.compare(password, results[0].password)
+
+                    if (comparison) {
+                        console.log("2")
+                        console.log({
+                            message: 'Login successful',
+                            data: results,
+                        });
+
+                        getTasksByStateAuthenticated()
+                    } else {
+                        // username & password do not match
+                        console.log("3")
+                        return res.send({
+                            code: "GT01"
+                        })
+                    }
+                } else {
+                    // username does not exist
+                    console.log("4")
+                    res.send({
+                        code: "GT01"
+                    })
+                }
             }
         })
+
+    } catch (err) {
+        console.log('Activated catch all in getTasksByState login')
+        console.log(err)
+        res.send({
+            code: "GT99"
+        })
     }
-})
+
+
+    const getTasksByStateAuthenticated = async () => {
+        try {
+            db.query(`select * from tasks where task_app_acronym = ? and task_state = ?`, [applicationName, taskState], (err, results) => {
+                if (err) {
+                    res.send({
+                        code: "GT03"
+                    })
+                } else {
+                    res.send({
+                        code: "GT00",
+                        tasks: results
+                    })
+                }
+            })
+
+        } catch (err) {
+            console.log('Catch all activated in getTasksByStateAuthenticated')
+            console.log(err)
+            res.send({
+                code: "GT99"
+            })
+        }
+    }
+}
 
 // @desc    Promote Task to Done State
 // @route   /api//tasks/promoteTask2Done
