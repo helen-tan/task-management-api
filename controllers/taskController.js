@@ -285,7 +285,7 @@ const createTask = async (req, res) => {
 // @route   /api//tasks/getTasksByState
 // @access  Private
 const getTasksByState = async (req, res) => {
-    const {
+    let {
         username,
         password,
         applicationName,
@@ -364,6 +364,34 @@ const getTasksByState = async (req, res) => {
 
     const getTasksByStateAuthenticated = async () => {
         try {
+            // Validation: Check if user input applicationName is an app_acronym that exists in the DB
+            const app_obj = await appExist(applicationName)
+            // console.log(app_obj)
+            if (app_obj.length < 1) {
+                console.log(`The application name ${applicationName} does not exist`)
+                return res.send({
+                    code: "GT02"
+                })
+            }
+
+            // Validation: The user input taskState cannot be empty
+            if (taskState.length < 1) {
+                console.log("Please provide a task state of  `open`, `todo`, `doing`, `done` or 'close'")
+                res.send({
+                    code: "GT03"
+                })
+            }
+
+            // Check if user input taskState is one of the 5 states: "open", "todo", "doing", "done", "close"
+            // convert user input to lowercase first
+            taskState = taskState.toLowerCase()
+            if (taskState !== "open" && taskState !== "todo" && taskState !== "doing" && taskState !== "done" && taskState !== "close" ) {
+                console.log("Please enter a task state of only `open`, `todo`, `doing`, `done` or 'close'")
+                return res.send({
+                    code: "GT03"
+                })
+            }
+
             db.query(`select * from tasks where task_app_acronym = ? and task_state = ?`, [applicationName, taskState], (err, results) => {
                 if (err) {
                     res.send({
