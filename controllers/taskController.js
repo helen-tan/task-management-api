@@ -31,6 +31,21 @@ const createTask = async (req, res) => {
         taskDescription
     } = req.body
 
+    // Validation: Username input cannot be empty
+    if (username.length < 1) {
+        console.log("Username input cannot be empty")
+        return res.send({
+            code: "CT01"
+        })
+    }
+    // Validation: Password input cannot be empty
+    if (password.length < 1) {
+        console.log("Password input cannot be empty")
+        return res.send({
+            code: "CT01"
+        })
+    }
+
     try {
         // req = abc // Use this to induce the catch all error
         // query database for the user with these login credentials
@@ -277,6 +292,21 @@ const getTasksByState = async (req, res) => {
         taskState
     } = req.body
 
+    // Validation: Username input cannot be empty
+    if (username.length < 1) {
+        console.log("Username input cannot be empty")
+        return res.send({
+            code: "GT01"
+        })
+    }
+    // Validation: Password input cannot be empty
+    if (password.length < 1) {
+        console.log("Password input cannot be empty")
+        return res.send({
+            code: "GT01"
+        })
+    }
+
     try {
         //req = abc // Use this to induce the catch all error
         // query database for the user with these login credentials
@@ -367,6 +397,21 @@ const promoteTask2Done = catchAsyncErrors(async (req, res) => {
         taskID,
         taskNotes
     } = req.body
+
+    // Validation: Username input cannot be empty
+    if (username.length < 1) {
+        console.log("Username input cannot be empty")
+        return res.send({
+            code: "PT01"
+        })
+    }
+    // Validation: Password input cannot be empty
+    if (password.length < 1) {
+        console.log("Password input cannot be empty")
+        return res.send({
+            code: "PT01"
+        })
+    }
 
     // query database for the user with these login credentials
     db.query('select * from users where username = ? ', [username], async (err, results) => {
