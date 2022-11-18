@@ -13,6 +13,7 @@ const { getUserGroups } = require('../utils/getUserGroups')
 const { getAppAcronym } = require('../utils/getAppAcronym')
 const { appExist } = require('../utils/appExist')
 const { getTaskByTaskId } = require('../utils/getTaskByTaskId')
+const { getTasksByTaskState } = require('../utils/getTasksbyTaskState')
 // const { checkGroup } = require('../utils/checkGroup')
 
 // @desc    Create a task (Note: An app must already exist in the DB. Please check in DB)
@@ -33,14 +34,14 @@ const createTask = async (req, res) => {
     } = req.body
 
     // Validation: Username input cannot be empty
-    if (username.length < 1) {
+    if (username === "" || undefined || null) {
         console.log("Username input cannot be empty")
         return res.send({
             code: "CT01"
         })
     }
     // Validation: Password input cannot be empty
-    if (password.length < 1) {
+    if (password === "" || undefined || null) {
         console.log("Password input cannot be empty")
         return res.send({
             code: "CT01"
@@ -106,7 +107,7 @@ const createTask = async (req, res) => {
     const createTaskAuthenticated = async () => {
         try {
             // Validation:applicationName input cannot be empty
-            if (applicationName.length < 1) {
+            if (applicationName === "" || undefined || null) {
                 console.log("applicationName input cannot be empty")
                 return res.send({
                     code: "CT02"
@@ -146,7 +147,7 @@ const createTask = async (req, res) => {
             // console.log(permitted)
 
             // Validation: Task name input cannot be empty
-            if (taskName.length < 1) {
+            if (taskName === "" || undefined || null) {
                 console.log("taskName input cannot be empty")
                 return res.send({
                     code: "CT03"
@@ -300,7 +301,6 @@ const getTasksByState = async (req, res) => {
         applicationName,
         taskState
     } = req.body
-    console.log(username)
 
     // Validation: Username input cannot be empty
     if (username === "" || undefined || null) {
@@ -310,7 +310,7 @@ const getTasksByState = async (req, res) => {
         })
     }
     // Validation: Password input cannot be empty
-    if (password.length < 1) {
+    if (password === "" || undefined || null) {
         console.log("Password input cannot be empty")
         return res.send({
             code: "GT01"
@@ -375,7 +375,7 @@ const getTasksByState = async (req, res) => {
     const getTasksByStateAuthenticated = async () => {
         try {
             // Validation:applicationName input cannot be empty
-            if (applicationName.length < 1) {
+            if (applicationName === "" || undefined || null) {
                 console.log("applicationName input cannot be empty")
                 return res.send({
                     code: "GT02"
@@ -393,9 +393,19 @@ const getTasksByState = async (req, res) => {
             }
 
             // Validation: The user input taskState cannot be empty
-            if (taskState.length < 1) {
-                console.log("Please provide a task state of  `open`, `todo`, `doing`, `done` or 'close'")
-                res.send({
+            if (taskState === "" || undefined || null) {
+                console.log("taskState cannot be empty")
+                return res.send({
+                    code: "GT03"
+                })
+            }
+
+            // Validation: Check if user input taskState is an task_state that exists in the DB
+            const tasks_obj = await getTasksByTaskState(taskState)
+             console.log(tasks_obj)
+            if (tasks_obj.length < 1) {
+                console.log(`The task state of ${taskState} does not exist`)
+                return res.send({
                     code: "GT03"
                 })
             }
@@ -445,14 +455,14 @@ const promoteTask2Done = async (req, res) => {
     } = req.body
 
     // Validation: Username input cannot be empty
-    if (username.length < 1) {
+    if (username === "" || undefined || null) {
         console.log("Username input cannot be empty")
         return res.send({
             code: "PT01"
         })
     }
     // Validation: Password input cannot be empty
-    if (password.length < 1) {
+    if (password === "" || undefined || null) {
         console.log("Password input cannot be empty")
         return res.send({
             code: "PT01"
@@ -520,7 +530,7 @@ const promoteTask2Done = async (req, res) => {
             // req = abc // Use this to induce the catch all error
 
             // Validation: Check that user input taskID is not empty
-            if (taskID.length < 1) {
+            if (taskID === "" || undefined || null) {
                 console.log("taskID input cannot be empty")
                 return res.send({
                     code: "PT03"
