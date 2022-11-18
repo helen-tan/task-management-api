@@ -124,6 +124,14 @@ const createTask = async (req, res) => {
                 })
             }
 
+            // Validation: Check that taskDescription json key is has the correct spelling (if it doesnt, its value will be undefined)
+            if (taskDescription === undefined || taskDescription === null) {
+                console.log("Please provide the taskDescription parameter")
+                return res.send({
+                    code: "CT03"
+                })
+            }
+
             // Check and see if user's groups is in the app's app_permit_create. Only users in the group specified by app_permit_create can create tasks
             // Get the app's app_permit_create
             const app_permit_create = await getAppPermitCreate(applicationName)
