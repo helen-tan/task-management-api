@@ -12,6 +12,7 @@ const { getAppPermitDoing } = require('../utils/getAppPermitDoing')
 const { getUserGroups } = require('../utils/getUserGroups')
 const { getAppAcronym } = require('../utils/getAppAcronym')
 const { appExist } = require('../utils/appExist')
+const { getTaskByTaskId } = require('../utils/getTaskByTaskId')
 // const { checkGroup } = require('../utils/checkGroup')
 
 // @desc    Create a task (Note: An app must already exist in the DB. Please check in DB)
@@ -442,7 +443,8 @@ const promoteTask2Done = async (req, res) => {
     }
 
     try {
-        //req = abc // Use this to induce the catch all error
+        // req = abc // Use this to induce the catch all error
+
         // query database for the user with these login credentials
         db.query('select * from users where username = ? ', [username], async (err, results) => {
             //console.log(results)
@@ -499,6 +501,26 @@ const promoteTask2Done = async (req, res) => {
     const promoteTask2DoneAuthenticated = async () => {
         try {
             // req = abc // Use this to induce the catch all error
+
+            // Validation: Check that user input taskID is not empty
+            if (taskID.length < 1) {
+                console.log("taskID input cannot be empty")
+                return res.send({
+                    code: "PT03"
+                })
+            }
+
+            // Validation: Check if user input taskID id a valid task_id in the DB
+            // try to get the task by the user input task id
+            let taskExist = await getTaskByTaskId(taskID)
+            // console.log(taskExist)
+            if (taskExist.length < 1) {
+                console.log("No such taskID")
+                return res.send({
+                    code: "PT03"
+                })
+            }
+
             // Check and see if user's groups is in the app's app_permit_doing. Only users in the group specified by app_permit_doing can promote tasks to Done
             // Get app_acronym of the task
             const app_acronym = await getAppAcronym(taskID)
