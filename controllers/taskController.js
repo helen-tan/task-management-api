@@ -105,6 +105,14 @@ const createTask = async (req, res) => {
 
     const createTaskAuthenticated = async () => {
         try {
+            // Validation:applicationName input cannot be empty
+            if (applicationName.length < 1) {
+                console.log("applicationName input cannot be empty")
+                return res.send({
+                    code: "CT02"
+                })
+            }
+
             // Validation: Check if the user input applicationName is an app_acronym that exist or not
             const app_obj = await appExist(applicationName)
             // console.log(app_obj)
@@ -365,6 +373,14 @@ const getTasksByState = async (req, res) => {
 
     const getTasksByStateAuthenticated = async () => {
         try {
+            // Validation:applicationName input cannot be empty
+            if (applicationName.length < 1) {
+                console.log("applicationName input cannot be empty")
+                return res.send({
+                    code: "GT02"
+                })
+            }
+
             // Validation: Check if user input applicationName is an app_acronym that exists in the DB
             const app_obj = await appExist(applicationName)
             // console.log(app_obj)
