@@ -7,7 +7,6 @@ const taskRoutes = require('./routes/taskRoutes')
 
 const app = express()
 
-// Routes
 app.get('/', (req, res) => {
     res.status(200).send({ message: 'Welcome to the Task Management API' })
 })
@@ -26,11 +25,6 @@ app.use((err, req, res, next) => {
     next();
 });
 
-// Catch all routes that don't exist (includes special chars. Except % for some reason..)
-app.all("*", (req, res, next) => {
-    res.send({ code: "AA99" })
-})
-
 // Catch incorrect passing of parameters in URL (catch % in url)
 app.use((err, req, res, next) => {
     try {
@@ -41,6 +35,12 @@ app.use((err, req, res, next) => {
     next()
 })
 
+// Routes
 app.use('/api/tasks', taskRoutes)
+
+// Catch all routes that don't exist (includes special chars. Except % for some reason..)
+app.all("*", (req, res, next) => {
+    res.send({ code: "AA99" })
+})
 
 app.listen(PORT, () => console.log(`Server start on port ${PORT}`))

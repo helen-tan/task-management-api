@@ -300,9 +300,10 @@ const getTasksByState = async (req, res) => {
         applicationName,
         taskState
     } = req.body
+    console.log(username)
 
     // Validation: Username input cannot be empty
-    if (username.length < 1) {
+    if (username === "" || undefined || null) {
         console.log("Username input cannot be empty")
         return res.send({
             code: "GT01"
