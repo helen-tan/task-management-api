@@ -662,13 +662,7 @@ const promoteTask2Done = async (req, res) => {
                         })
                     } else {
                         res.send({
-                            code: "PT00",
-                            data: {
-                                task_id: taskID,
-                                task_state: new_state,
-                                task_owner: username,
-                                task_notes: updated_task_notes
-                            },
+                            code: "PT00"
                         })
 
                         // Send Email
