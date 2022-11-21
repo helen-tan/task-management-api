@@ -14,6 +14,7 @@ const { getAppAcronym } = require('../utils/getAppAcronym')
 const { appExist } = require('../utils/appExist')
 const { getTaskByTaskId } = require('../utils/getTaskByTaskId')
 const { getTasksByTaskState } = require('../utils/getTasksbyTaskState')
+const { sendEmail } = require('../utils/sendEmail')
 // const { checkGroup } = require('../utils/checkGroup')
 
 // @desc    Create a task (Note: An app must already exist in the DB. Please check in DB)
@@ -669,6 +670,9 @@ const promoteTask2Done = async (req, res) => {
                                 task_notes: updated_task_notes
                             },
                         })
+
+                        // Send Email
+                        sendEmail(req, res)
                     }
                 })
             }
