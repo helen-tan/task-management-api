@@ -17,7 +17,7 @@ app.use(express.urlencoded({ extended: true })) // accept urlencoded form
 
 // Catch incorrect json format
 app.use((err, req, res, next) => {
-    if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
+    if (err instanceof SyntaxError) {
         console.error(err);
         return res.send({ code: "AA88" }); 
         // return res.status(400).send({ status: 404, message: err.message }); // Bad request
@@ -26,7 +26,7 @@ app.use((err, req, res, next) => {
 });
 
 // Catch incorrect passing of parameters in URL (catch % in url)
-app.use((err, req, res, next) => {
+app.use((req, res, next) => {
     try {
         decodeURIComponent(req.path)
     } catch (err) {
@@ -41,6 +41,7 @@ app.use('/api/tasks', taskRoutes)
 // Catch all routes that don't exist (includes special chars. Except % for some reason..)
 app.all("*", (req, res, next) => {
     res.send({ code: "AA99" })
+    next()
 })
 
 app.listen(PORT, () => console.log(`Server start on port ${PORT}`))

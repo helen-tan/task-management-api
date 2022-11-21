@@ -132,6 +132,14 @@ const createTask = async (req, res) => {
                 })
             }
 
+             // Validation: Check that taskDescription must be a string (cannot accept numbers without quotes)
+             if (typeof taskDescription !== 'string' || taskDescription instanceof String ) {
+                console.log("Please provide a correct taskDescription value")
+                return res.send({
+                    code: "CT03"
+                })
+            }
+
             // Check and see if user's groups is in the app's app_permit_create. Only users in the group specified by app_permit_create can create tasks
             // Get the app's app_permit_create
             const app_permit_create = await getAppPermitCreate(applicationName)
@@ -542,7 +550,7 @@ const promoteTask2Done = async (req, res) => {
             if (taskID === "" || taskID === undefined || taskID === null) {
                 console.log("taskID input cannot be empty")
                 return res.send({
-                    code: "PT03"
+                    code: "PT02"
                 })
             }
 
@@ -553,7 +561,7 @@ const promoteTask2Done = async (req, res) => {
             if (taskExist.length < 1) {
                 console.log("No such taskID")
                 return res.send({
-                    code: "PT03"
+                    code: "PT02"
                 })
             }
 
@@ -561,7 +569,7 @@ const promoteTask2Done = async (req, res) => {
             if (taskNotes === undefined || taskNotes === null) {
                 console.log("Please provide the taskNotes parameter")
                 return res.send({
-                    code: "PT03"
+                    code: "PT02"
                 })
             }
 
